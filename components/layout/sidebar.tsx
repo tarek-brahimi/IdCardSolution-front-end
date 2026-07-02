@@ -3,28 +3,26 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  BarChart3,
   Camera,
   ClipboardList,
   Home,
-  Settings,
   Users,
 } from 'lucide-react'
 import { Avatar } from '@/components/shared/avatar'
 import { StaggerContainer, StaggerItem } from '@/components/shared/motion'
+import { useTranslation } from '@/lib/language-context'
 import { cn } from '@/lib/utils'
-
-const navigationItems = [
-  { href: '/dashboard', label: 'Tableau de bord', icon: Home },
-  { href: '/scanner', label: 'Scanner', icon: Camera },
-  { href: '/stagiaires', label: 'Stagiaires', icon: Users },
-  { href: '/historique', label: 'Historique', icon: ClipboardList },
-  { href: '/statistiques', label: 'Statistiques', icon: BarChart3 },
-  { href: '/parametres', label: 'Paramètres', icon: Settings },
-]
 
 function Sidebar() {
   const pathname = usePathname()
+  const { t } = useTranslation()
+
+  const navigationItems = [
+    { href: '/dashboard', label: t('nav.dashboard'), icon: Home },
+    { href: '/scanner', label: t('nav.scanner'), icon: Camera },
+    { href: '/stagiaires', label: t('nav.interns'), icon: Users },
+    { href: '/historique', label: t('nav.history'), icon: ClipboardList },
+  ]
 
   return (
     <aside className="flex w-64 flex-col bg-slate-900 text-white">
@@ -35,7 +33,7 @@ function Sidebar() {
           </div>
           <div>
             <p className="text-lg font-bold font-heading">Stagify</p>
-            <p className="text-xs text-slate-400">Management</p>
+            <p className="text-xs text-slate-400">{t('sidebar.management')}</p>
           </div>
         </Link>
       </div>
@@ -68,7 +66,7 @@ function Sidebar() {
           <Avatar initials="JD" size="md" className="bg-indigo-600 text-white" />
           <div className="flex-1 text-sm">
             <p className="font-semibold">Jean Dupont</p>
-            <p className="text-xs text-slate-400">Admin</p>
+            <p className="text-xs text-slate-400">{t('sidebar.role')}</p>
           </div>
         </div>
       </div>

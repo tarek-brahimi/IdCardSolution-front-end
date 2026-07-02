@@ -1,5 +1,7 @@
-import { cn } from '@/lib/utils'
-import type { CardType, InternStatus } from '@/types'
+'use client'
+
+import { useTranslation } from '@/lib/language-context'
+import { CardType, InternStatus } from '@/types'
 
 const cardColors: Record<CardType, string> = {
   CNI: 'bg-indigo-100 text-indigo-800',
@@ -9,23 +11,22 @@ const cardColors: Record<CardType, string> = {
 
 function Badge({ type, className }: { type: CardType; className?: string }) {
   return (
-    <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold', cardColors[type], className)}>
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${cardColors[type]} ${className ?? ''}`}>
       {type}
     </span>
   )
 }
 
 function StatusBadge({ status }: { status: InternStatus }) {
+  const { t } = useTranslation()
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold',
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
       status === 'present' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
-    )}>
-      <span className={cn(
-        'h-2 w-2 rounded-full',
+    }`}>
+      <span className={`h-2 w-2 rounded-full ${
         status === 'present' ? 'bg-emerald-500' : 'bg-slate-400'
-      )} />
-      {status === 'present' ? 'Présent' : 'Parti'}
+      }`} />
+      {status === 'present' ? t('badge.present') : t('badge.absent')}
     </span>
   )
 }

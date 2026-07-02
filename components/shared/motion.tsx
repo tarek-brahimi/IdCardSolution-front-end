@@ -1,7 +1,6 @@
 'use client'
 
 import { motion, type Variants } from 'framer-motion'
-import type { ReactNode } from 'react'
 
 const spring = { type: 'spring' as const, stiffness: 400, damping: 30 }
 
@@ -30,7 +29,7 @@ const staggerItemVariants: Variants = {
   visible: { opacity: 1, y: 0, transition: spring },
 }
 
-function FadeIn({ children, className }: { children: ReactNode; className?: string }) {
+function FadeIn({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <motion.div
       initial="hidden"
@@ -38,12 +37,12 @@ function FadeIn({ children, className }: { children: ReactNode; className?: stri
       variants={fadeInVariants}
       className={className}
     >
-      {children}
+      {children as React.ReactElement}
     </motion.div>
   )
 }
 
-function SlideUp({ children, className }: { children: ReactNode; className?: string }) {
+function SlideUp({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <motion.div
       initial="hidden"
@@ -51,12 +50,12 @@ function SlideUp({ children, className }: { children: ReactNode; className?: str
       variants={slideUpVariants}
       className={className}
     >
-      {children}
+      {children as React.ReactElement}
     </motion.div>
   )
 }
 
-function StaggerContainer({ children, className }: { children: ReactNode; className?: string }) {
+function StaggerContainer({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <motion.div
       initial="hidden"
@@ -64,15 +63,15 @@ function StaggerContainer({ children, className }: { children: ReactNode; classN
       variants={staggerContainerVariants}
       className={className}
     >
-      {children}
+      {children as React.ReactElement}
     </motion.div>
   )
 }
 
-function StaggerItem({ children, className }: { children: ReactNode; className?: string }) {
+function StaggerItem({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <motion.div variants={staggerItemVariants} className={className}>
-      {children}
+      {children as React.ReactElement}
     </motion.div>
   )
 }

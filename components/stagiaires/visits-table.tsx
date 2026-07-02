@@ -6,10 +6,13 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
+import { useTranslation } from '@/lib/language-context'
 import { mockVisits } from '@/data/mock-visits'
 import type { Visit } from '@/types'
 
 function VisitsTable({ visits, title }: { visits: Visit[]; title?: string }) {
+  const { t } = useTranslation()
+
   return (
     <Card>
       {title && (
@@ -21,13 +24,13 @@ function VisitsTable({ visits, title }: { visits: Visit[]; title?: string }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Stagiaire</TableHead>
-              <TableHead>Type carte</TableHead>
-              <TableHead>Arrivée</TableHead>
-              <TableHead>Départ</TableHead>
-              <TableHead>Durée</TableHead>
-              <TableHead>Statut</TableHead>
+              <TableHead>{t('history.date')}</TableHead>
+              <TableHead>{t('history.stagiaire')}</TableHead>
+              <TableHead>{t('history.cardType')}</TableHead>
+              <TableHead>{t('history.arrival')}</TableHead>
+              <TableHead>{t('history.departure')}</TableHead>
+              <TableHead>{t('history.duration')}</TableHead>
+              <TableHead>{t('history.status')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -41,7 +44,7 @@ function VisitsTable({ visits, title }: { visits: Visit[]; title?: string }) {
                 <TableCell>{visit.arrivee}</TableCell>
                 <TableCell>{visit.depart || '-'}</TableCell>
                 <TableCell className="font-semibold">{visit.duree}</TableCell>
-                <TableCell className="font-semibold text-emerald-600">Complète</TableCell>
+                <TableCell className="font-semibold text-emerald-600">{t('history.complete')}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -53,6 +56,7 @@ function VisitsTable({ visits, title }: { visits: Visit[]; title?: string }) {
 
 function HistoryPage() {
   const [dateFilter, setDateFilter] = useState('')
+  const { t } = useTranslation()
   const visits = dateFilter ? mockVisits.filter((v) => v.date === dateFilter) : mockVisits
 
   return (
@@ -66,7 +70,7 @@ function HistoryPage() {
         />
         <button className="ml-auto flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-indigo-700">
           <Download className="h-5 w-5" />
-          Imprimer le rapport
+          {t('history.print')}
         </button>
       </div>
       <VisitsTable visits={visits} />

@@ -1,13 +1,18 @@
+'use client'
+
 import { cn } from '@/lib/utils'
+import { useTranslation } from '@/lib/language-context'
 import type { ScanStatus } from '@/hooks/use-scan'
 
-const statusConfig: Record<ScanStatus, { color: string; label: string }> = {
-  waiting: { color: 'bg-amber-500', label: 'En attente de scan...' },
-  detected: { color: 'bg-emerald-500', label: 'Carte détectée' },
-  processing: { color: 'bg-indigo-500', label: 'Traitement...' },
-}
-
 function ScanStatusIndicator({ status }: { status: ScanStatus }) {
+  const { t } = useTranslation()
+
+  const statusConfig: Record<ScanStatus, { color: string; label: string }> = {
+    waiting: { color: 'bg-amber-500', label: t('scanner.status.waiting') },
+    detected: { color: 'bg-emerald-500', label: t('scanner.status.detected') },
+    processing: { color: 'bg-indigo-500', label: t('scanner.status.processing') },
+  }
+
   const config = statusConfig[status]
 
   return (

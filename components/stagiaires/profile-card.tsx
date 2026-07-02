@@ -1,3 +1,5 @@
+'use client'
+
 import { LogOut } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -7,12 +9,14 @@ import { InfoRow } from '@/components/shared/info-row'
 import { MiniStat } from '@/components/shared/mini-stat'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { StaggerContainer, StaggerItem, FadeIn } from '@/components/shared/motion'
+import { useTranslation } from '@/lib/language-context'
 import { mockInterns } from '@/data/mock-interns'
 import { mockVisits } from '@/data/mock-visits'
 import { weekVisits } from '@/data/chart-data'
 
 function ProfileCard({ internId }: { internId: string }) {
   const intern = mockInterns.find((i) => i.id === internId)
+  const { t } = useTranslation()
   if (!intern) return null
 
   const internVisits = mockVisits.filter((v) => v.internId === internId)
@@ -27,7 +31,7 @@ function ProfileCard({ internId }: { internId: string }) {
           {intern.status === 'present' && (
             <button className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-700">
               <LogOut className="h-5 w-5" />
-              Check-out
+              {t('dashboard.checkout')}
             </button>
           )}
         </div>
@@ -44,11 +48,11 @@ function ProfileCard({ internId }: { internId: string }) {
                   <StatusBadge status={intern.status} />
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <InfoRow label="NIN" value={intern.nin} />
-                  <InfoRow label="Date de naissance" value={intern.dateNaissance} />
-                  <InfoRow label="Lieu de naissance" value={intern.lieuNaissance} />
-                  <InfoRow label="Première visite" value={intern.firstVisit} />
-                  <InfoRow label="Total visites" value={intern.totalVisits.toString()} />
+                  <InfoRow label={t('scanner.nin')} value={intern.nin} />
+                  <InfoRow label={t('scanner.birthDate')} value={intern.dateNaissance} />
+                  <InfoRow label={t('profile.birthPlace')} value={intern.lieuNaissance} />
+                  <InfoRow label={t('profile.firstVisit')} value={intern.firstVisit} />
+                  <InfoRow label={t('profile.totalVisits')} value={intern.totalVisits.toString()} />
                 </div>
               </div>
             </div>
@@ -61,7 +65,7 @@ function ProfileCard({ internId }: { internId: string }) {
           <Card>
             <CardContent>
               <div className="mb-4 flex h-40 items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-slate-400">
-                Scan de carte
+                {t('profile.cardScan')}
               </div>
               <div className="flex justify-center">
                 <Badge type={intern.type} />
@@ -71,15 +75,15 @@ function ProfileCard({ internId }: { internId: string }) {
 
           <div className="lg:col-span-2 space-y-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <MiniStat label="Visites cette semaine" value="5" />
-              <MiniStat label="Temps total" value="42h" />
-              <MiniStat label="Moyenne d'arrivée" value="8:36" />
+              <MiniStat label={t('profile.weekVisits')} value="5" />
+              <MiniStat label={t('profile.totalTime')} value="42h" />
+              <MiniStat label={t('profile.avgArrival')} value="8:36" />
             </div>
 
             <FadeIn>
               <Card>
                 <CardHeader>
-                  <CardTitle>Présence des 7 derniers jours</CardTitle>
+                  <CardTitle>{t('profile.presence7days')}</CardTitle>
                 </CardHeader>
                 <div className="px-6 pb-4">
                   <ResponsiveContainer width="100%" height={200}>
@@ -101,17 +105,17 @@ function ProfileCard({ internId }: { internId: string }) {
       <StaggerItem>
         <Card>
           <CardHeader>
-            <CardTitle>Historique des visites</CardTitle>
+            <CardTitle>{t('profile.visitHistory')}</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Arrivée</TableHead>
-                  <TableHead>Départ</TableHead>
-                  <TableHead>Durée</TableHead>
-                  <TableHead>Statut</TableHead>
+                  <TableHead>{t('table.date')}</TableHead>
+                  <TableHead>{t('table.arrival')}</TableHead>
+                  <TableHead>{t('table.departure')}</TableHead>
+                  <TableHead>{t('table.duration')}</TableHead>
+                  <TableHead>{t('table.status')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -121,7 +125,7 @@ function ProfileCard({ internId }: { internId: string }) {
                     <TableCell>{visit.arrivee}</TableCell>
                     <TableCell>{visit.depart || '-'}</TableCell>
                     <TableCell className="font-semibold">{visit.duree}</TableCell>
-                    <TableCell className="font-semibold text-emerald-600">Complète</TableCell>
+                    <TableCell className="font-semibold text-emerald-600">{t('history.complete')}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

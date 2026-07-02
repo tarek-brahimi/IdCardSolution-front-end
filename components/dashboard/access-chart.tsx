@@ -1,10 +1,15 @@
+'use client'
+
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import { ChartCard } from './chart-card'
+import { useTranslation } from '@/lib/language-context'
 import { chartData7Days } from '@/data/chart-data'
 
 function AccessChart() {
+  const { t } = useTranslation()
+
   return (
-    <ChartCard title="Accès des 7 derniers jours">
+    <ChartCard title={t('chart.access7days')}>
       <BarChart data={chartData7Days}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
         <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 12 }} />

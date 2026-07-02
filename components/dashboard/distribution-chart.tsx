@@ -1,12 +1,17 @@
+'use client'
+
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslation } from '@/lib/language-context'
 import { distributionData } from '@/data/chart-data'
 
 function DistributionChart() {
+  const { t } = useTranslation()
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Répartition par type de carte</CardTitle>
+        <CardTitle>{t('chart.distribution')}</CardTitle>
       </CardHeader>
       <div className="px-6 pb-4">
         <ResponsiveContainer width="100%" height={300}>
