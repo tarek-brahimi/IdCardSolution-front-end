@@ -6,7 +6,6 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Stagify',
   description: 'Gestion des stagiaires et des accès par carte',
-  generator: 'v0.app',
   icons: {
     icon: [
       {
