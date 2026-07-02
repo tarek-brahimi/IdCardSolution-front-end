@@ -656,6 +656,110 @@ const ProfilePage = ({ internId }: { internId: string }) => {
 
 const HistoriquePage = () => {
   const [dateFilter, setDateFilter] = useState('');
+  const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
+
+  const selectedVisit = selectedVisitId ? mockVisits.find((v) => v.id === selectedVisitId) : null;
+  const selectedIntern = selectedVisit ? mockInterns.find((i) => i.id === selectedVisit.internId) : null;
+
+  if (selectedVisit && selectedIntern) {
+    return (
+      <div className="space-y-6">
+        <button
+          onClick={() => setSelectedVisitId(null)}
+          className="text-gray-600 hover:text-gray-900 font-semibold text-sm flex items-center gap-1"
+        >
+          ← Retour à l&apos;historique
+        </button>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left side - Card and Photo */}
+          <div className="space-y-6">
+            {/* Card Image Placeholder */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Carte scannée</h2>
+              <div className="bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg border-2 border-gray-300 p-8 aspect-video flex items-center justify-center relative">
+                <div className="absolute top-4 right-4">
+                  <Badge type={selectedVisit.type} />
+                </div>
+                <div className="text-center">
+                  <p className="text-gray-600 font-semibold mb-2">Type de carte</p>
+                  <p className="text-5xl font-bold text-gray-400">{selectedVisit.type}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Stagiaire Info */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Stagiaire</h2>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-4xl">
+                  {selectedIntern.photo}
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-gray-900">
+                    {selectedIntern.prenom} {selectedIntern.nom}
+                  </p>
+                  <Badge type={selectedIntern.type} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right side - Visit Details */}
+          <div className="bg-white rounded-lg shadow-sm p-6 space-y-8">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">Détails de la visite</h2>
+
+              {/* Check-in Time */}
+              <div className="mb-10 pb-10 border-b border-gray-200">
+                <p className="text-sm text-gray-600 mb-2">Heure d&apos;arrivée</p>
+                <p className="text-5xl font-bold text-green-600">
+                  {selectedVisit.arrivee}
+                </p>
+                <p className="text-gray-700 font-semibold mt-2">Entrée</p>
+              </div>
+
+              {/* Check-out Time */}
+              <div className="mb-10 pb-10 border-b border-gray-200">
+                <p className="text-sm text-gray-600 mb-2">Heure de départ</p>
+                <p className="text-5xl font-bold text-red-600">
+                  {selectedVisit.depart || '-'}
+                </p>
+                <p className="text-gray-700 font-semibold mt-2">Sortie</p>
+              </div>
+
+              {/* Duration */}
+              <div className="mb-10 pb-10 border-b border-gray-200">
+                <p className="text-sm text-gray-600 mb-2">Durée totale</p>
+                <p className="text-4xl font-bold text-blue-600">
+                  {selectedVisit.duree}
+                </p>
+                <p className="text-gray-700 font-semibold mt-2">Durée</p>
+              </div>
+
+              {/* NIN Validation */}
+              <div>
+                <p className="text-sm text-gray-600 mb-3">Numéro d&apos;identification national</p>
+                <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                  <p className="font-mono font-semibold text-gray-900">{selectedIntern.nin}</p>
+                  <span className="flex items-center gap-2 text-green-600 font-semibold">
+                    <Check className="w-5 h-5" />
+                    VALIDE
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Date */}
+            <div className="pt-6 border-t border-gray-200">
+              <p className="text-sm text-gray-600">Date de visite</p>
+              <p className="text-lg font-semibold text-gray-900">{selectedVisit.date}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -690,7 +794,7 @@ const HistoriquePage = () => {
             </thead>
             <tbody>
               {mockVisits.map((visit) => (
-                <tr key={visit.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
+                <tr key={visit.id} className="border-b border-gray-200 hover:bg-gray-50 transition cursor-pointer">
                   <td className="px-4 py-3">{visit.date}</td>
                   <td className="px-4 py-3 font-semibold text-gray-900">{visit.stagiaire}</td>
                   <td className="px-4 py-3">
@@ -700,7 +804,12 @@ const HistoriquePage = () => {
                   <td className="px-4 py-3">{visit.depart || '-'}</td>
                   <td className="px-4 py-3 font-semibold">{visit.duree}</td>
                   <td className="px-4 py-3">
-                    <button className="text-blue-600 hover:text-blue-700 font-semibold text-sm">Détails</button>
+                    <button
+                      onClick={() => setSelectedVisitId(visit.id)}
+                      className="text-blue-600 hover:text-blue-700 font-semibold text-sm"
+                    >
+                      Détails
+                    </button>
                   </td>
                 </tr>
               ))}
