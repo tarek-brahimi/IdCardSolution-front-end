@@ -1,51 +1,56 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState, type ElementType, type ReactElement, type ReactNode } from 'react';
 import {
-  Home,
-  Camera,
-  Users,
-  ClipboardList,
   BarChart3,
-  Settings,
   Bell,
-  Clock,
-  LogOut,
-  Eye,
-  Download,
-  X,
+  Camera,
   Check,
-  AlertCircle,
+  ClipboardList,
+  Clock,
+  Download,
+  Eye,
+  Home,
+  LogOut,
+  Settings,
+  User,
+  Users,
+  X,
 } from 'lucide-react';
 import {
-  BarChart,
   Bar,
-  PieChart,
-  Pie,
+  BarChart,
+  CartesianGrid,
   Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  LineChart,
-  Line,
 } from 'recharts';
 
-// Types
+type CardType = 'CNI' | 'PERMIS' | 'AUTRE';
+type InternStatus = 'present' | 'depart';
+type FilterType = CardType | 'all';
+type FilterStatus = InternStatus | 'all';
+type PageId = 'dashboard' | 'scanner' | 'stagiaires' | 'profil' | 'historique' | 'statistiques' | 'parametres';
+
 interface Intern {
   id: string;
-  photo: string;
+  initials: string;
   nom: string;
   prenom: string;
-  type: 'CNI' | 'PERMIS' | 'AUTRE';
+  type: CardType;
   nin: string;
   dateNaissance: string;
   lieuNaissance: string;
   firstVisit: string;
   totalVisits: number;
-  status: 'present' | 'depart';
+  status: InternStatus;
   lastVisit: string;
   arriveeTime?: string;
 }
@@ -54,18 +59,30 @@ interface Visit {
   id: string;
   internId: string;
   stagiaire: string;
-  type: 'CNI' | 'PERMIS' | 'AUTRE';
+  type: CardType;
   arrivee: string;
   depart: string | null;
   duree: string;
   date: string;
 }
 
-// Mock data
+interface NavigationItem {
+  id: Exclude<PageId, 'profil'>;
+  label: string;
+  icon: ElementType;
+}
+
+const cardTypes: CardType[] = ['CNI', 'PERMIS', 'AUTRE'];
+const internStatuses: InternStatus[] = ['present', 'depart'];
+
+const isFilterType = (value: string): value is FilterType => value === 'all' || cardTypes.includes(value as CardType);
+const isFilterStatus = (value: string): value is FilterStatus =>
+  value === 'all' || internStatuses.includes(value as InternStatus);
+
 const mockInterns: Intern[] = [
   {
     id: '1',
-    photo: '👤',
+    initials: 'AD',
     nom: 'Dupont',
     prenom: 'Alice',
     type: 'CNI',
@@ -80,7 +97,7 @@ const mockInterns: Intern[] = [
   },
   {
     id: '2',
-    photo: '👤',
+    initials: 'JM',
     nom: 'Martin',
     prenom: 'Jean',
     type: 'PERMIS',
@@ -95,7 +112,7 @@ const mockInterns: Intern[] = [
   },
   {
     id: '3',
-    photo: '👤',
+    initials: 'MB',
     nom: 'Bernard',
     prenom: 'Marie',
     type: 'CNI',
@@ -110,46 +127,10 @@ const mockInterns: Intern[] = [
 ];
 
 const mockVisits: Visit[] = [
-  {
-    id: '1',
-    internId: '1',
-    stagiaire: 'Alice Dupont',
-    type: 'CNI',
-    date: '2024-01-09',
-    arrivee: '08:30',
-    depart: '17:45',
-    duree: '9h 15m',
-  },
-  {
-    id: '2',
-    internId: '2',
-    stagiaire: 'Jean Martin',
-    type: 'PERMIS',
-    date: '2024-01-09',
-    arrivee: '09:15',
-    depart: '17:30',
-    duree: '8h 15m',
-  },
-  {
-    id: '3',
-    internId: '3',
-    stagiaire: 'Marie Bernard',
-    type: 'CNI',
-    date: '2024-01-08',
-    arrivee: '08:45',
-    depart: '17:00',
-    duree: '8h 15m',
-  },
-  {
-    id: '4',
-    internId: '1',
-    stagiaire: 'Alice Dupont',
-    type: 'CNI',
-    date: '2024-01-08',
-    arrivee: '08:30',
-    depart: '17:45',
-    duree: '9h 15m',
-  },
+  { id: '1', internId: '1', stagiaire: 'Alice Dupont', type: 'CNI', date: '2024-01-09', arrivee: '08:30', depart: '17:45', duree: '9h 15m' },
+  { id: '2', internId: '2', stagiaire: 'Jean Martin', type: 'PERMIS', date: '2024-01-09', arrivee: '09:15', depart: '17:30', duree: '8h 15m' },
+  { id: '3', internId: '3', stagiaire: 'Marie Bernard', type: 'CNI', date: '2024-01-08', arrivee: '08:45', depart: '17:00', duree: '8h 15m' },
+  { id: '4', internId: '1', stagiaire: 'Alice Dupont', type: 'CNI', date: '2024-01-08', arrivee: '08:30', depart: '17:45', duree: '9h 15m' },
 ];
 
 const chartData7Days = [
@@ -168,36 +149,35 @@ const distributionData = [
   { name: 'Autre', value: 7, color: '#ef4444' },
 ];
 
-const presenceData30Days = [
-  { date: '1', visits: 32 },
-  { date: '2', visits: 28 },
-  { date: '3', visits: 35 },
-  { date: '4', visits: 30 },
-  { date: '5', visits: 38 },
-  { date: '6', visits: 42 },
-  { date: '7', visits: 40 },
-  { date: '8', visits: 35 },
-  { date: '9', visits: 45 },
-  { date: '10', visits: 38 },
+const navigationItems: NavigationItem[] = [
+  { id: 'dashboard', label: 'Tableau de bord', icon: Home },
+  { id: 'scanner', label: 'Scanner', icon: Camera },
+  { id: 'stagiaires', label: 'Stagiaires', icon: Users },
+  { id: 'historique', label: 'Historique', icon: ClipboardList },
+  { id: 'statistiques', label: 'Statistiques', icon: BarChart3 },
+  { id: 'parametres', label: 'Paramètres', icon: Settings },
 ];
 
-const Badge = ({ type }: { type: 'CNI' | 'PERMIS' | 'AUTRE' }) => {
-  const colors = {
+const Badge = ({ type }: { type: CardType }) => {
+  const colors: Record<CardType, string> = {
     CNI: 'bg-green-100 text-green-800',
     PERMIS: 'bg-amber-100 text-amber-800',
     AUTRE: 'bg-red-100 text-red-800',
   };
-  return (
-    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${colors[type]}`}>
-      {type}
-    </span>
-  );
+
+  return <span className={`rounded-full px-2 py-1 text-xs font-semibold ${colors[type]}`}>{type}</span>;
 };
 
-const StatCard = ({ label, value, icon: Icon }: { label: string; value: string | number; icon: React.ElementType }) => (
-  <div className="bg-white rounded-lg shadow-sm p-6 flex items-center gap-4">
-    <div className="p-3 bg-green-100 rounded-lg">
-      <Icon className="w-6 h-6 text-green-600" />
+const Avatar = ({ initials }: { initials: string }) => (
+  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-sm font-bold text-green-700">
+    {initials}
+  </div>
+);
+
+const StatCard = ({ label, value, icon: Icon }: { label: string; value: string | number; icon: ElementType }) => (
+  <div className="flex items-center gap-4 rounded-lg bg-white p-6 shadow-sm">
+    <div className="rounded-lg bg-green-100 p-3">
+      <Icon className="h-6 w-6 text-green-600" />
     </div>
     <div>
       <p className="text-sm text-gray-600">{label}</p>
@@ -206,60 +186,52 @@ const StatCard = ({ label, value, icon: Icon }: { label: string; value: string |
   </div>
 );
 
-// Pages
 const Dashboard = () => (
   <div className="space-y-6">
     <h1 className="text-3xl font-bold text-gray-900">Tableau de bord</h1>
-
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
       <StatCard label="Total stagiaires aujourd'hui" value={45} icon={Users} />
       <StatCard label="Actuellement présents" value={12} icon={Check} />
       <StatCard label="Total visites ce mois" value={892} icon={ClipboardList} />
       <StatCard label="Durée moyenne de présence" value="8h 30m" icon={Clock} />
     </div>
 
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Accès des 7 derniers jours</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData7Days}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="CNI" fill="#22c55e" />
-            <Bar dataKey="PERMIS" fill="#f59e0b" />
-            <Bar dataKey="autre" fill="#ef4444" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <ChartCard title="Accès des 7 derniers jours">
+        <BarChart data={chartData7Days}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <XAxis dataKey="date" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="CNI" fill="#22c55e" />
+          <Bar dataKey="PERMIS" fill="#f59e0b" />
+          <Bar dataKey="autre" fill="#ef4444" />
+        </BarChart>
+      </ChartCard>
 
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Répartition par type de carte</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie data={distributionData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value">
-              {distributionData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartCard title="Répartition par type de carte">
+        <PieChart>
+          <Pie data={distributionData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value">
+            {distributionData.map((entry) => (
+              <Cell key={entry.name} fill={entry.color} />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend />
+        </PieChart>
+      </ChartCard>
     </div>
 
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Stagiaires actuellement présents</h2>
+    <div className="rounded-lg bg-white p-6 shadow-sm">
+      <h2 className="mb-4 text-lg font-semibold text-gray-900">Stagiaires actuellement présents</h2>
       <div className="space-y-3">
         {mockInterns
-          .filter((i) => i.status === 'present')
+          .filter((intern) => intern.status === 'present')
           .map((intern) => (
-            <div key={intern.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+            <div key={intern.id} className="flex items-center justify-between rounded-lg border border-gray-200 p-3 hover:bg-gray-50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-lg">{intern.photo}</div>
+                <Avatar initials={intern.initials} />
                 <div>
                   <p className="font-semibold text-gray-900">
                     {intern.prenom} {intern.nom}
@@ -267,8 +239,8 @@ const Dashboard = () => (
                   <p className="text-sm text-gray-500">Arrivée: {intern.arriveeTime}</p>
                 </div>
               </div>
-              <button className="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-sm font-semibold hover:bg-red-200 flex items-center gap-1">
-                <LogOut className="w-4 h-4" />
+              <button className="flex items-center gap-1 rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-700 hover:bg-red-200">
+                <LogOut className="h-4 w-4" />
                 Check-out
               </button>
             </div>
@@ -278,122 +250,108 @@ const Dashboard = () => (
   </div>
 );
 
+const ChartCard = ({ title, children }: { title: string; children: ReactElement }) => (
+  <div className="rounded-lg bg-white p-6 shadow-sm">
+    <h2 className="mb-4 text-lg font-semibold text-gray-900">{title}</h2>
+    <ResponsiveContainer width="100%" height={300}>
+      {children}
+    </ResponsiveContainer>
+  </div>
+);
+
 const Scanner = ({ onSelectIntern }: { onSelectIntern: (id: string) => void }) => {
   const [status, setStatus] = useState<'waiting' | 'detected' | 'processing'>('waiting');
   const [detectedIntern, setDetectedIntern] = useState<Intern | null>(null);
 
   const simulateScan = () => {
     setStatus('processing');
-    setTimeout(() => {
+    window.setTimeout(() => {
       setDetectedIntern(mockInterns[Math.floor(Math.random() * mockInterns.length)]);
       setStatus('detected');
-    }, 2000);
+    }, 1000);
+  };
+
+  const resetScan = () => {
+    setStatus('waiting');
+    setDetectedIntern(null);
   };
 
   const handleCheckIn = () => {
-    if (detectedIntern) {
-      onSelectIntern(detectedIntern.id);
-      setStatus('waiting');
-      setDetectedIntern(null);
+    if (!detectedIntern) {
+      return;
     }
+
+    onSelectIntern(detectedIntern.id);
+    resetScan();
   };
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Scanner</h1>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Caméra</h2>
-          <div className="bg-gray-900 rounded-lg overflow-hidden mb-4">
-            <div className="aspect-video flex items-center justify-center text-gray-400">
-              <Camera className="w-16 h-16" />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-lg bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">Caméra</h2>
+          <div className="mb-4 overflow-hidden rounded-lg bg-gray-900">
+            <div className="flex aspect-video items-center justify-center text-gray-400">
+              <Camera className="h-16 w-16" />
             </div>
           </div>
-
-          <div className="flex items-center justify-center gap-2 p-4 rounded-lg bg-gray-100 mb-4">
-            <div
-              className={`w-3 h-3 rounded-full ${
+          <div className="mb-4 flex items-center justify-center gap-2 rounded-lg bg-gray-100 p-4">
+            <span
+              className={`h-3 w-3 rounded-full ${
                 status === 'waiting' ? 'bg-yellow-500' : status === 'detected' ? 'bg-green-500' : 'bg-blue-500'
               }`}
             />
             <p className="font-semibold text-gray-900">
               {status === 'waiting' && 'En attente de scan...'}
-              {status === 'detected' && 'Carte détectée !'}
+              {status === 'detected' && 'Carte détectée'}
               {status === 'processing' && 'Traitement...'}
             </p>
           </div>
-
           <button
             onClick={simulateScan}
-            className="w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+            className="w-full rounded-lg bg-green-600 py-3 font-semibold text-white transition hover:bg-green-700"
           >
             Simuler un scan
           </button>
         </div>
 
         {detectedIntern && status === 'detected' && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Résultat du scan</h2>
-
-            <div className="mb-6 p-4 bg-gray-100 rounded-lg flex items-center justify-center h-40 text-gray-400">
+          <div className="rounded-lg bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">Résultat du scan</h2>
+            <div className="mb-6 flex h-40 items-center justify-center rounded-lg bg-gray-100 p-4 text-gray-400">
               <div className="text-center">
-                <div className="text-6xl mb-2">{detectedIntern.photo}</div>
+                <div className="mb-3 flex justify-center">
+                  <Avatar initials={detectedIntern.initials} />
+                </div>
                 <Badge type={detectedIntern.type} />
               </div>
             </div>
-
-            <div className="space-y-3 mb-6">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Type de carte:</span>
-                <Badge type={detectedIntern.type} />
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Nom:</span>
-                <span className="font-semibold">{detectedIntern.nom}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Prénom:</span>
-                <span className="font-semibold">{detectedIntern.prenom}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Date de naissance:</span>
-                <span className="font-semibold">{detectedIntern.dateNaissance}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">NIN:</span>
-                <span className="font-semibold font-mono">{detectedIntern.nin}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Statut NIN:</span>
-                <span className="flex items-center gap-2 text-green-600 font-semibold">
-                  <Check className="w-4 h-4" /> VALIDE
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Heure d&apos;arrivée:</span>
-                <span className="font-semibold">
-                  {new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
+            <div className="mb-6 space-y-3">
+              <InfoRow label="Type de carte" value={<Badge type={detectedIntern.type} />} />
+              <InfoRow label="Nom" value={detectedIntern.nom} />
+              <InfoRow label="Prénom" value={detectedIntern.prenom} />
+              <InfoRow label="Date de naissance" value={detectedIntern.dateNaissance} />
+              <InfoRow label="NIN" value={<span className="font-mono">{detectedIntern.nin}</span>} />
+              <InfoRow label="Statut NIN" value={<span className="text-green-600">VALIDE</span>} />
+              <InfoRow
+                label="Heure d'arrivée"
+                value={new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+              />
             </div>
-
             <div className="flex gap-3">
               <button
                 onClick={handleCheckIn}
-                className="flex-1 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-600 py-3 font-semibold text-white transition hover:bg-green-700"
               >
-                <Check className="w-5 h-5" />
+                <Check className="h-5 w-5" />
                 Confirmer le Check-in
               </button>
               <button
-                onClick={() => {
-                  setStatus('waiting');
-                  setDetectedIntern(null);
-                }}
-                className="flex-1 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition flex items-center justify-center gap-2"
+                onClick={resetScan}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-600 py-3 font-semibold text-white transition hover:bg-red-700"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
                 Annuler
               </button>
             </div>
@@ -404,15 +362,21 @@ const Scanner = ({ onSelectIntern }: { onSelectIntern: (id: string) => void }) =
   );
 };
 
+const InfoRow = ({ label, value }: { label: string; value: ReactNode }) => (
+  <div className="flex justify-between gap-4">
+    <span className="text-gray-600">{label}:</span>
+    <span className="font-semibold text-gray-900">{value}</span>
+  </div>
+);
+
 const StagiairesPage = ({ onSelectIntern }: { onSelectIntern: (id: string) => void }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'CNI' | 'PERMIS' | 'AUTRE'>('all');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'present' | 'depart'>('all');
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
 
   const filtered = mockInterns.filter((intern) => {
-    const matchesSearch =
-      `${intern.prenom} ${intern.nom}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      intern.nin.includes(searchTerm);
+    const query = searchTerm.toLowerCase();
+    const matchesSearch = `${intern.prenom} ${intern.nom}`.toLowerCase().includes(query) || intern.nin.includes(query);
     const matchesType = filterType === 'all' || intern.type === filterType;
     const matchesStatus = filterStatus === 'all' || intern.status === filterStatus;
     return matchesSearch && matchesType && matchesStatus;
@@ -421,20 +385,19 @@ const StagiairesPage = ({ onSelectIntern }: { onSelectIntern: (id: string) => vo
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Stagiaires</h1>
-
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="rounded-lg bg-white p-6 shadow-sm">
+        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
           <input
             type="text"
             placeholder="Rechercher par nom ou NIN..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="col-span-1 md:col-span-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            onChange={(event) => setSearchTerm(event.target.value)}
+            className="col-span-1 rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 md:col-span-2"
           />
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            onChange={(event) => isFilterType(event.target.value) && setFilterType(event.target.value)}
+            className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
           >
             <option value="all">Tous les types</option>
             <option value="CNI">CNI</option>
@@ -443,74 +406,82 @@ const StagiairesPage = ({ onSelectIntern }: { onSelectIntern: (id: string) => vo
           </select>
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as any)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            onChange={(event) => isFilterStatus(event.target.value) && setFilterStatus(event.target.value)}
+            className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
           >
             <option value="all">Tous les statuts</option>
             <option value="present">Présent</option>
             <option value="depart">Parti</option>
           </select>
         </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Photo</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Nom Prénom</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Type</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">NIN</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Dernière visite</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Statut</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((intern) => (
-                <tr key={intern.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
-                  <td className="px-4 py-3 text-center text-lg">{intern.photo}</td>
-                  <td className="px-4 py-3 font-semibold text-gray-900">
-                    {intern.prenom} {intern.nom}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge type={intern.type} />
-                  </td>
-                  <td className="px-4 py-3 font-mono text-gray-600">{intern.nin}</td>
-                  <td className="px-4 py-3 text-gray-600">{intern.lastVisit}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
-                        intern.status === 'present'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      <span className={`w-2 h-2 rounded-full ${intern.status === 'present' ? 'bg-green-600' : 'bg-gray-400'}`} />
-                      {intern.status === 'present' ? 'Présent' : 'Parti'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => onSelectIntern(intern.id)}
-                      className="text-green-600 hover:text-green-700 font-semibold text-sm flex items-center gap-1"
-                    >
-                      <Eye className="w-4 h-4" />
-                      Voir profil
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <InternTable interns={filtered} onSelectIntern={onSelectIntern} />
       </div>
     </div>
   );
 };
 
+const InternTable = ({ interns, onSelectIntern }: { interns: Intern[]; onSelectIntern: (id: string) => void }) => (
+  <div className="overflow-x-auto">
+    <table className="w-full text-sm">
+      <thead>
+        <tr className="border-b border-gray-200">
+          {['Photo', 'Nom Prénom', 'Type', 'NIN', 'Dernière visite', 'Statut', 'Actions'].map((heading) => (
+            <th key={heading} className="px-4 py-3 text-left font-semibold text-gray-700">
+              {heading}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {interns.map((intern) => (
+          <tr key={intern.id} className="border-b border-gray-200 transition hover:bg-gray-50">
+            <td className="px-4 py-3">
+              <Avatar initials={intern.initials} />
+            </td>
+            <td className="px-4 py-3 font-semibold text-gray-900">
+              {intern.prenom} {intern.nom}
+            </td>
+            <td className="px-4 py-3">
+              <Badge type={intern.type} />
+            </td>
+            <td className="px-4 py-3 font-mono text-gray-600">{intern.nin}</td>
+            <td className="px-4 py-3 text-gray-600">{intern.lastVisit}</td>
+            <td className="px-4 py-3">
+              <StatusBadge status={intern.status} />
+            </td>
+            <td className="px-4 py-3">
+              <button
+                onClick={() => onSelectIntern(intern.id)}
+                className="flex items-center gap-1 text-sm font-semibold text-green-600 hover:text-green-700"
+              >
+                <Eye className="h-4 w-4" />
+                Voir profil
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
+const StatusBadge = ({ status }: { status: InternStatus }) => (
+  <span
+    className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
+      status === 'present' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+    }`}
+  >
+    <span className={`h-2 w-2 rounded-full ${status === 'present' ? 'bg-green-600' : 'bg-gray-400'}`} />
+    {status === 'present' ? 'Présent' : 'Parti'}
+  </span>
+);
+
 const ProfilePage = ({ internId }: { internId: string }) => {
-  const intern = mockInterns.find((i) => i.id === internId);
-  if (!intern) return null;
+  const intern = mockInterns.find((candidate) => candidate.id === internId);
+
+  if (!intern) {
+    return null;
+  }
 
   const weekVisits = [
     { date: 'Lun', duree: 8.5 },
@@ -521,8 +492,7 @@ const ProfilePage = ({ internId }: { internId: string }) => {
     { date: 'Sam', duree: 0 },
     { date: 'Dim', duree: 0 },
   ];
-
-  const internVisits = mockVisits.filter((v) => v.internId === internId);
+  const internVisits = mockVisits.filter((visit) => visit.internId === internId);
 
   return (
     <div className="space-y-6">
@@ -531,83 +501,49 @@ const ProfilePage = ({ internId }: { internId: string }) => {
           {intern.prenom} {intern.nom}
         </h1>
         {intern.status === 'present' && (
-          <button className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 flex items-center gap-2">
-            <LogOut className="w-5 h-5" />
+          <button className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700">
+            <LogOut className="h-5 w-5" />
             Check-out
           </button>
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="rounded-lg bg-white p-6 shadow-sm">
         <div className="flex items-start gap-6">
-          <div className="text-6xl">{intern.photo}</div>
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700">
+            {intern.initials}
+          </div>
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="mb-4 flex items-center gap-3">
               <Badge type={intern.type} />
-              <span
-                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
-                  intern.status === 'present'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}
-              >
-                <span className={`w-2 h-2 rounded-full ${intern.status === 'present' ? 'bg-green-600' : 'bg-gray-400'}`} />
-                {intern.status === 'present' ? 'Présent' : 'Parti'}
-              </span>
+              <StatusBadge status={intern.status} />
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-600">NIN</p>
-                <p className="font-mono font-semibold text-gray-900">{intern.nin}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Date de naissance</p>
-                <p className="font-semibold text-gray-900">{intern.dateNaissance}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Lieu de naissance</p>
-                <p className="font-semibold text-gray-900">{intern.lieuNaissance}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Première visite</p>
-                <p className="font-semibold text-gray-900">{intern.firstVisit}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total visites</p>
-                <p className="font-semibold text-gray-900">{intern.totalVisits}</p>
-              </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <ProfileField label="NIN" value={intern.nin} mono />
+              <ProfileField label="Date de naissance" value={intern.dateNaissance} />
+              <ProfileField label="Lieu de naissance" value={intern.lieuNaissance} />
+              <ProfileField label="Première visite" value={intern.firstVisit} />
+              <ProfileField label="Total visites" value={intern.totalVisits.toString()} />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="p-4 bg-gray-100 rounded-lg mb-4 h-40 flex items-center justify-center text-gray-400 border-2 border-gray-200">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="rounded-lg bg-white p-6 shadow-sm">
+          <div className="mb-4 flex h-40 items-center justify-center rounded-lg border-2 border-gray-200 bg-gray-100 text-gray-400">
             Scan de carte
           </div>
           <Badge type={intern.type} />
         </div>
-
         <div className="lg:col-span-2">
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-              <p className="text-sm text-gray-600">Visites cette semaine</p>
-              <p className="text-3xl font-bold text-green-600">5</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-              <p className="text-sm text-gray-600">Temps total</p>
-              <p className="text-3xl font-bold text-green-600">42h</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-              <p className="text-sm text-gray-600">Moyenne d&apos;arrivée</p>
-              <p className="text-3xl font-bold text-green-600">8:36</p>
-            </div>
+          <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <MiniStat label="Visites cette semaine" value="5" />
+            <MiniStat label="Temps total" value="42h" />
+            <MiniStat label="Moyenne d'arrivée" value="8:36" />
           </div>
-
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Présence des 7 derniers jours</h3>
+          <div className="rounded-lg bg-white p-6 shadow-sm">
+            <h3 className="mb-4 font-semibold text-gray-900">Présence des 7 derniers jours</h3>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={weekVisits}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -621,99 +557,87 @@ const ProfilePage = ({ internId }: { internId: string }) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Historique des visites</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Date</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Heure arrivée</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Heure départ</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Durée</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {internVisits.map((visit) => (
-                <tr key={visit.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
-                  <td className="px-4 py-3">{visit.date}</td>
-                  <td className="px-4 py-3">{visit.arrivee}</td>
-                  <td className="px-4 py-3">{visit.depart || '-'}</td>
-                  <td className="px-4 py-3 font-semibold">{visit.duree}</td>
-                  <td className="px-4 py-3">
-                    <span className="text-green-600 font-semibold">✓ Complète</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <VisitsTable visits={internVisits} title="Historique des visites" />
     </div>
   );
 };
 
+const ProfileField = ({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) => (
+  <div>
+    <p className="text-sm text-gray-600">{label}</p>
+    <p className={`font-semibold text-gray-900 ${mono ? 'font-mono' : ''}`}>{value}</p>
+  </div>
+);
+
+const MiniStat = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-lg bg-white p-4 text-center shadow-sm">
+    <p className="text-sm text-gray-600">{label}</p>
+    <p className="text-3xl font-bold text-green-600">{value}</p>
+  </div>
+);
+
 const HistoriquePage = () => {
   const [dateFilter, setDateFilter] = useState('');
+  const visits = dateFilter ? mockVisits.filter((visit) => visit.date === dateFilter) : mockVisits;
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Historique</h1>
-
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex items-center gap-4 mb-6">
+      <div className="rounded-lg bg-white p-6 shadow-sm">
+        <div className="mb-6 flex items-center gap-4">
           <input
             type="date"
             value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            onChange={(event) => setDateFilter(event.target.value)}
+            className="rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
           />
-          <button className="ml-auto px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 flex items-center gap-2">
-            <Download className="w-5 h-5" />
+          <button className="ml-auto flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">
+            <Download className="h-5 w-5" />
             Imprimer le rapport
           </button>
         </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Date</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Stagiaire</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Type carte</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Arrivée</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Départ</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Durée</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockVisits.map((visit) => (
-                <tr key={visit.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
-                  <td className="px-4 py-3">{visit.date}</td>
-                  <td className="px-4 py-3 font-semibold text-gray-900">{visit.stagiaire}</td>
-                  <td className="px-4 py-3">
-                    <Badge type={visit.type} />
-                  </td>
-                  <td className="px-4 py-3">{visit.arrivee}</td>
-                  <td className="px-4 py-3">{visit.depart || '-'}</td>
-                  <td className="px-4 py-3 font-semibold">{visit.duree}</td>
-                  <td className="px-4 py-3">
-                    <button className="text-blue-600 hover:text-blue-700 font-semibold text-sm">Détails</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <VisitsTable visits={visits} />
       </div>
     </div>
   );
 };
 
+const VisitsTable = ({ visits, title }: { visits: Visit[]; title?: string }) => (
+  <div className={title ? 'rounded-lg bg-white p-6 shadow-sm' : ''}>
+    {title && <h3 className="mb-4 text-lg font-semibold text-gray-900">{title}</h3>}
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-gray-200">
+            {['Date', 'Stagiaire', 'Type carte', 'Arrivée', 'Départ', 'Durée', 'Statut'].map((heading) => (
+              <th key={heading} className="px-4 py-3 text-left font-semibold text-gray-700">
+                {heading}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {visits.map((visit) => (
+            <tr key={visit.id} className="border-b border-gray-200 transition hover:bg-gray-50">
+              <td className="px-4 py-3">{visit.date}</td>
+              <td className="px-4 py-3 font-semibold text-gray-900">{visit.stagiaire}</td>
+              <td className="px-4 py-3">
+                <Badge type={visit.type} />
+              </td>
+              <td className="px-4 py-3">{visit.arrivee}</td>
+              <td className="px-4 py-3">{visit.depart || '-'}</td>
+              <td className="px-4 py-3 font-semibold">{visit.duree}</td>
+              <td className="px-4 py-3 font-semibold text-green-600">Complète</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
 const StatisticsPage = () => {
-  const topStagiaires = [
+  const topStagiaires: Array<{ name: string; visits: number; type: CardType }> = [
     { name: 'Alice Dupont', visits: 42, type: 'CNI' },
     { name: 'Jean Martin', visits: 38, type: 'PERMIS' },
     { name: 'Marie Bernard', visits: 35, type: 'CNI' },
@@ -724,59 +648,49 @@ const StatisticsPage = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Statistiques</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <StatCard label="Taux de présence" value="92%" icon={Check} />
         <StatCard label="Total visites" value="1,245" icon={ClipboardList} />
         <StatCard label="Durée moyenne" value="8h 24m" icon={Clock} />
         <StatCard label="Types de cartes" value="3" icon={BarChart3} />
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Accès des 7 derniers jours</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData7Days}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="CNI" fill="#22c55e" />
-              <Bar dataKey="PERMIS" fill="#f59e0b" />
-              <Bar dataKey="autre" fill="#ef4444" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Répartition par type</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie data={distributionData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value">
-                {distributionData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <ChartCard title="Accès des 7 derniers jours">
+          <BarChart data={chartData7Days}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="CNI" fill="#22c55e" />
+            <Bar dataKey="PERMIS" fill="#f59e0b" />
+            <Bar dataKey="autre" fill="#ef4444" />
+          </BarChart>
+        </ChartCard>
+        <ChartCard title="Répartition par type">
+          <PieChart>
+            <Pie data={distributionData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value">
+              {distributionData.map((entry) => (
+                <Cell key={entry.name} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </ChartCard>
       </div>
-
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Top stagiaires par nombre de visites</h2>
+      <div className="rounded-lg bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">Top stagiaires par nombre de visites</h2>
         <div className="space-y-3">
           {topStagiaires.map((stagiaire, index) => (
-            <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-              <div className="flex items-center gap-4 flex-1">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center font-semibold text-green-700">
+            <div key={stagiaire.name} className="flex items-center justify-between rounded-lg border border-gray-200 p-4 hover:bg-gray-50">
+              <div className="flex flex-1 items-center gap-4">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 font-semibold text-green-700">
                   {index + 1}
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">{stagiaire.name}</p>
-                  <Badge type={stagiaire.type as any} />
+                  <Badge type={stagiaire.type} />
                 </div>
               </div>
               <div className="text-right">
@@ -791,132 +705,116 @@ const StatisticsPage = () => {
   );
 };
 
-// Main App
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<string>('dashboard');
+  const [currentPage, setCurrentPage] = useState<PageId>('dashboard');
   const [selectedInternId, setSelectedInternId] = useState<string | null>(null);
-  const [time, setTime] = useState<string>('');
+  const [time, setTime] = useState('');
 
   useEffect(() => {
     const updateTime = () => {
-      const now = new Date();
       setTime(
-        now.toLocaleString('fr-FR', {
+        new Date().toLocaleString('fr-FR', {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
-        })
+        }),
       );
     };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
-  const navigationItems = [
-    { id: 'dashboard', label: 'Tableau de bord', icon: Home },
-    { id: 'scanner', label: 'Scanner', icon: Camera },
-    { id: 'stagiaires', label: 'Stagiaires', icon: Users },
-    { id: 'historique', label: 'Historique', icon: ClipboardList },
-    { id: 'statistiques', label: 'Statistiques', icon: BarChart3 },
-    { id: 'parametres', label: 'Paramètres', icon: Settings },
-  ];
+    updateTime();
+    const interval = window.setInterval(updateTime, 1000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const handleSelectIntern = (id: string) => {
     setSelectedInternId(id);
     setCurrentPage('profil');
   };
 
-  const handleBack = () => {
+  const handleNavigation = (pageId: NavigationItem['id']) => {
+    setCurrentPage(pageId);
     setSelectedInternId(null);
-    setCurrentPage('stagiaires');
   };
+
+  const topBarLabel = currentPage === 'profil' ? 'Profil' : navigationItems.find((item) => item.id === currentPage)?.label;
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-64 bg-gray-900 text-white flex flex-col">
-        <div className="p-6 border-b border-gray-800">
+      <aside className="flex w-64 flex-col bg-gray-900 text-white">
+        <div className="border-b border-gray-800 p-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center font-bold">S</div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-600 font-bold">S</div>
             <div>
-              <p className="font-bold text-lg">Stagify</p>
+              <p className="text-lg font-bold">Stagify</p>
               <p className="text-xs text-gray-400">Management</p>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 space-y-2 p-4">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => {
-                  setCurrentPage(item.id);
-                  setSelectedInternId(null);
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                  isActive
-                    ? 'bg-green-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-800'
+                onClick={() => handleNavigation(item.id)}
+                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 transition ${
+                  isActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800'
                 }`}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className="h-5 w-5" />
                 <span className="text-sm font-medium">{item.label}</span>
               </button>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-800">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-800">
-            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center font-bold">JD</div>
+        <div className="border-t border-gray-800 p-4">
+          <div className="flex items-center gap-3 rounded-lg bg-gray-800 px-4 py-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-600 font-bold">JD</div>
             <div className="flex-1 text-sm">
               <p className="font-semibold">Jean Dupont</p>
               <p className="text-xs text-gray-400">Admin</p>
             </div>
           </div>
         </div>
-      </div>
+      </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <header className="flex items-center justify-between border-b border-gray-200 bg-white px-8 py-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {navigationItems.find((item) => item.id === currentPage)?.label}
-            </h1>
-            <p className="text-sm text-gray-500 capitalize">{time}</p>
+            <h1 className="text-2xl font-bold text-gray-900">{topBarLabel}</h1>
+            <p className="text-sm capitalize text-gray-500">{time}</p>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
-              <Bell className="w-6 h-6" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+            <button className="relative rounded-lg p-2 text-gray-700 transition hover:bg-gray-100" aria-label="Notifications">
+              <Bell className="h-6 w-6" />
+              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
             </button>
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 font-bold text-green-700">
               JD
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Page Content */}
-        <div className="flex-1 overflow-auto p-8">
+        <main className="flex-1 overflow-auto p-8">
           {currentPage === 'dashboard' && <Dashboard />}
           {currentPage === 'scanner' && <Scanner onSelectIntern={handleSelectIntern} />}
           {currentPage === 'stagiaires' && <StagiairesPage onSelectIntern={handleSelectIntern} />}
           {currentPage === 'profil' && selectedInternId && (
             <div>
               <button
-                onClick={handleBack}
-                className="mb-4 text-green-600 hover:text-green-700 font-semibold text-sm flex items-center gap-1"
+                onClick={() => {
+                  setSelectedInternId(null);
+                  setCurrentPage('stagiaires');
+                }}
+                className="mb-4 flex items-center gap-1 text-sm font-semibold text-green-600 hover:text-green-700"
               >
-                ← Retour
+                Retour
               </button>
               <ProfilePage internId={selectedInternId} />
             </div>
@@ -924,12 +822,18 @@ export default function App() {
           {currentPage === 'historique' && <HistoriquePage />}
           {currentPage === 'statistiques' && <StatisticsPage />}
           {currentPage === 'parametres' && (
-            <div className="text-center text-gray-500 py-12">
-              <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Section Paramètres - À venir</p>
+            <div className="py-12 text-center text-gray-500">
+              <Settings className="mx-auto mb-4 h-12 w-12 opacity-50" />
+              <p>Section Paramètres - à venir</p>
             </div>
           )}
-        </div>
+          {currentPage === 'profil' && !selectedInternId && (
+            <div className="py-12 text-center text-gray-500">
+              <User className="mx-auto mb-4 h-12 w-12 opacity-50" />
+              <p>Aucun profil sélectionné</p>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );
