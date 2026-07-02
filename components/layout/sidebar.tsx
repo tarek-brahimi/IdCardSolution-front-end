@@ -11,6 +11,7 @@ import {
   Users,
 } from 'lucide-react'
 import { Avatar } from '@/components/shared/avatar'
+import { StaggerContainer, StaggerItem } from '@/components/shared/motion'
 import { cn } from '@/lib/utils'
 
 const navigationItems = [
@@ -39,27 +40,28 @@ function Sidebar() {
         </Link>
       </div>
 
-      <nav className="flex-1 space-y-1 p-4">
+      <StaggerContainer className="flex-1 space-y-1 p-4">
         {navigationItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-              )}
-            >
-              <Icon className="h-5 w-5" />
-              {item.label}
-            </Link>
+            <StaggerItem key={item.href}>
+              <Link
+                href={item.href}
+                className={cn(
+                  'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-indigo-600 text-white'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                )}
+              >
+                <Icon className="h-5 w-5" />
+                {item.label}
+              </Link>
+            </StaggerItem>
           )
         })}
-      </nav>
+      </StaggerContainer>
 
       <div className="border-t border-slate-800 p-4">
         <div className="flex items-center gap-3 rounded-lg bg-slate-800 px-4 py-3">

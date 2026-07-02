@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { Avatar } from '@/components/shared/avatar'
+import { StaggerContainer, StaggerItem } from '@/components/shared/motion'
 import { mockInterns } from '@/data/mock-interns'
 import type { FilterType, FilterStatus } from '@/types'
 
@@ -92,33 +93,37 @@ function InternTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((intern) => (
-              <TableRow key={intern.id}>
-                <TableCell>
-                  <Avatar initials={intern.initials} />
-                </TableCell>
-                <TableCell className="font-semibold text-slate-900">
-                  {intern.prenom} {intern.nom}
-                </TableCell>
-                <TableCell>
-                  <Badge type={intern.type} />
-                </TableCell>
-                <TableCell className="font-mono text-slate-600">{intern.nin}</TableCell>
-                <TableCell>{intern.lastVisit}</TableCell>
-                <TableCell>
-                  <StatusBadge status={intern.status} />
-                </TableCell>
-                <TableCell>
-                  <Link
-                    href={`/stagiaires/${intern.id}`}
-                    className="flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
-                  >
-                    <Eye className="h-4 w-4" />
-                    Voir profil
-                  </Link>
-                </TableCell>
-              </TableRow>
-            ))}
+            <StaggerContainer>
+              {filtered.map((intern) => (
+                <StaggerItem key={intern.id}>
+                  <TableRow>
+                    <TableCell>
+                      <Avatar initials={intern.initials} />
+                    </TableCell>
+                    <TableCell className="font-semibold text-slate-900">
+                      {intern.prenom} {intern.nom}
+                    </TableCell>
+                    <TableCell>
+                      <Badge type={intern.type} />
+                    </TableCell>
+                    <TableCell className="font-mono text-slate-600">{intern.nin}</TableCell>
+                    <TableCell>{intern.lastVisit}</TableCell>
+                    <TableCell>
+                      <StatusBadge status={intern.status} />
+                    </TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/stagiaires/${intern.id}`}
+                        className="flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+                      >
+                        <Eye className="h-4 w-4" />
+                        Voir profil
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
           </TableBody>
         </Table>
       </CardContent>
