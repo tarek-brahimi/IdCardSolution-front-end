@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { AppShell } from '@/components/layout/app-shell'
 import { CameraView } from '@/components/scanner/camera-view'
 import { ScanStatusIndicator } from '@/components/scanner/scan-status'
@@ -9,12 +10,13 @@ import { useScan } from '@/hooks/use-scan'
 import { useTranslation } from '@/lib/language-context'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { StaggerContainer, StaggerItem } from '@/components/shared/motion'
+
 
 export default function ScannerPage() {
   const router = useRouter()
   const { status, detectedIntern, simulateScan, resetScan } = useScan()
   const { t } = useTranslation()
+  const isDetected = detectedIntern && status === 'detected'
 
   const handleCheckIn = () => {
     if (!detectedIntern) return
@@ -24,8 +26,16 @@ export default function ScannerPage() {
 
   return (
     <AppShell title={t('scanner.title')}>
-      <StaggerContainer className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <StaggerItem>
+      <div className="flex items-start gap-6">
+        <motion.div
+          className="w-full"
+          animate={{
+            width: isDetected ? '50%' : '100%',
+            x: isDetected ? -10 : 0,
+            scale: isDetected ? 0.98 : 1,
+          }}
+          transition={{ type: 'spring', stiffness: 80, damping: 15, duration: 0.7 }}
+        >
           <Card>
             <CardHeader>
               <CardTitle>{t('scanner.camera')}</CardTitle>
@@ -43,18 +53,23 @@ export default function ScannerPage() {
               </Button>
             </CardContent>
           </Card>
-        </StaggerItem>
+        </motion.div>
 
-        {detectedIntern && status === 'detected' && (
-          <StaggerItem>
+        {isDetected && (
+          <motion.div
+            className="w-1/2"
+            initial={{ opacity: 0, x: 60, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 80, damping: 15, delay: 0.35 }}
+          >
             <ScanResult
               intern={detectedIntern}
               onConfirm={handleCheckIn}
               onCancel={resetScan}
             />
-          </StaggerItem>
+          </motion.div>
         )}
-      </StaggerContainer>
+      </div>
     </AppShell>
   )
 }
