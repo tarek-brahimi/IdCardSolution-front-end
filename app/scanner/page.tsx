@@ -1,5 +1,6 @@
 'use client'
 
+import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { AppShell } from '@/components/layout/app-shell'
@@ -8,21 +9,30 @@ import { ScanStatusIndicator } from '@/components/scanner/scan-status'
 import { ScanResult } from '@/components/scanner/scan-result'
 import { useScan } from '@/hooks/use-scan'
 import { useTranslation } from '@/lib/language-context'
+import { api } from '@/lib/api'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
-
 export default function ScannerPage() {
   const router = useRouter()
-  const { status, detectedIntern, simulateScan, resetScan } = useScan()
+  const { status, detectedIntern, scanResult, captureAndScan, resetScan } = useScan()
   const { t } = useTranslation()
-  const isDetected = detectedIntern && status === 'detected'
+  const isDetected = scanResult && status === 'detected'
 
-  const handleCheckIn = () => {
+  const handleCheckIn = useCallback(async () => {
     if (!detectedIntern) return
+    try {
+      await api.checkin(detectedIntern.id)
+    } catch (err) {
+      console.error('Checkin error:', err)
+    }
     resetScan()
     router.push('/stagiaires')
-  }
+  }, [detectedIntern, resetScan, router])
+
+  const handleCancel = useCallback(() => {
+    resetScan()
+  }, [resetScan])
 
   return (
     <AppShell title={t('scanner.title')}>
@@ -44,18 +54,18 @@ export default function ScannerPage() {
               <CameraView />
               <ScanStatusIndicator status={status} />
               <Button
-                onClick={simulateScan}
+                onClick={captureAndScan}
                 disabled={status === 'processing'}
                 className="w-full"
                 size="lg"
               >
-                {t('scanner.simulate')}
+                {status === 'processing' ? t('scanner.processing') : t('scanner.simulate')}
               </Button>
             </CardContent>
           </Card>
         </motion.div>
 
-        {isDetected && (
+        {isDetected && scanResult && (
           <motion.div
             className="w-1/2"
             initial={{ opacity: 0, x: 60, scale: 0.9 }}
@@ -63,9 +73,9 @@ export default function ScannerPage() {
             transition={{ type: 'spring', stiffness: 80, damping: 15, delay: 0.35 }}
           >
             <ScanResult
-              intern={detectedIntern}
+              scanResult={scanResult}
               onConfirm={handleCheckIn}
-              onCancel={resetScan}
+              onCancel={handleCancel}
             />
           </motion.div>
         )}

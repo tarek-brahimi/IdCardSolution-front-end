@@ -3,14 +3,16 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import { ChartCard } from './chart-card'
 import { useTranslation } from '@/lib/language-context'
-import { chartData7Days } from '@/data/chart-data'
+import { useApi } from '@/hooks/use-api'
+import { api } from '@/lib/api'
 
 function AccessChart() {
   const { t } = useTranslation()
+  const { data } = useApi(() => api.getStatsAccess())
 
   return (
     <ChartCard title={t('chart.access7days')}>
-      <BarChart data={chartData7Days}>
+      <BarChart data={data || []}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
         <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 12 }} />
         <YAxis tick={{ fill: '#64748b', fontSize: 12 }} />

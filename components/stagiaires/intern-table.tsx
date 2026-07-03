@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Eye, SearchX } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -11,24 +11,23 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Avatar } from '@/components/shared/avatar'
 import { FadeIn } from '@/components/shared/motion'
 import { useTranslation } from '@/lib/language-context'
-import { mockInterns } from '@/data/mock-interns'
+import { api } from '@/lib/api'
 import type { FilterType, FilterStatus } from '@/types'
 
 function InternTable() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<FilterType>('all')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
+  const [interns, setInterns] = useState<any[]>([])
   const { t } = useTranslation()
 
-  const filtered = mockInterns.filter((intern) => {
-    const query = searchTerm.toLowerCase()
-    const matchesSearch =
-      `${intern.prenom} ${intern.nom}`.toLowerCase().includes(query) ||
-      intern.nin.includes(query)
-    const matchesType = filterType === 'all' || intern.type === filterType
-    const matchesStatus = filterStatus === 'all' || intern.status === filterStatus
-    return matchesSearch && matchesType && matchesStatus
-  })
+  useEffect(() => {
+    const params: any = {}
+    if (searchTerm) params.search = searchTerm
+    if (filterType !== 'all') params.type = filterType
+    if (filterStatus !== 'all') params.status = filterStatus
+    api.listStagiaires(params).then(setInterns).catch(() => setInterns([]))
+  }, [searchTerm, filterType, filterStatus])
 
   return (
     <Card>
@@ -69,7 +68,7 @@ function InternTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.length === 0 ? (
+            {interns.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7}>
                   <FadeIn>
@@ -81,7 +80,7 @@ function InternTable() {
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((intern) => (
+              interns.map((intern: any) => (
                 <TableRow key={intern.id}>
                   <TableCell>
                     <Avatar initials={intern.initials} />

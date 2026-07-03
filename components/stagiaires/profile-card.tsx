@@ -6,21 +6,24 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge, StatusBadge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Avatar } from '@/components/shared/avatar'
 import { InfoRow } from '@/components/shared/info-row'
 import { MiniStat } from '@/components/shared/mini-stat'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { StaggerContainer, StaggerItem, FadeIn } from '@/components/shared/motion'
 import { useTranslation } from '@/lib/language-context'
-import { mockInterns } from '@/data/mock-interns'
-import { mockVisits } from '@/data/mock-visits'
-import { weekVisits } from '@/data/chart-data'
+import { useApi } from '@/hooks/use-api'
+import { api } from '@/lib/api'
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 function ProfileCard({ internId }: { internId: string }) {
-  const intern = mockInterns.find((i) => i.id === internId)
   const { t } = useTranslation()
+  const { data: profile, loading } = useApi(() => api.getProfile(internId), [internId])
+  const { data: visits } = useApi(() => api.getStagiaireVisits(internId), [internId])
 
-  if (!intern) {
+  if (loading) return <div className="py-16 text-center text-slate-400">Chargement...</div>
+
+  if (!profile) {
     return (
       <FadeIn>
         <div className="flex flex-col items-center justify-center py-16 text-slate-400">
@@ -34,16 +37,16 @@ function ProfileCard({ internId }: { internId: string }) {
     )
   }
 
-  const internVisits = mockVisits.filter((v) => v.internId === internId)
+  const weekVisits = profile.weekVisits || []
 
   return (
     <StaggerContainer className="space-y-6">
       <StaggerItem>
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-slate-900 font-heading">
-            {intern.prenom} {intern.nom}
+            {profile.prenom} {profile.nom}
           </h1>
-          {intern.status === 'present' && (
+          {profile.status === 'present' && (
             <Button variant="destructive" size="lg">
               <LogOut className="mr-2 h-5 w-5" />
               {t('dashboard.checkout')}
@@ -56,18 +59,30 @@ function ProfileCard({ internId }: { internId: string }) {
         <Card>
           <CardContent>
             <div className="flex items-start gap-6">
-              <Avatar initials={intern.initials} size="lg" />
+              <div className="flex-shrink-0">
+                {profile.image_path ? (
+                  <img
+                    src={`${API_BASE}/${profile.image_path}`}
+                    alt="Document scanné"
+                    className="w-32 h-32 object-cover rounded-xl border border-slate-200"
+                  />
+                ) : (
+                  <div className="w-32 h-32 flex items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-slate-400">
+                    <span className="text-xs text-center">{t('profile.noScan')}</span>
+                  </div>
+                )}
+              </div>
               <div className="flex-1">
                 <div className="mb-4 flex items-center gap-3">
-                  <Badge type={intern.type} />
-                  <StatusBadge status={intern.status} />
+                  <Badge type={profile.type} />
+                  <StatusBadge status={profile.status} />
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <InfoRow label={t('scanner.nin')} value={intern.nin} />
-                  <InfoRow label={t('scanner.birthDate')} value={intern.dateNaissance} />
-                  <InfoRow label={t('profile.birthPlace')} value={intern.lieuNaissance} />
-                  <InfoRow label={t('profile.firstVisit')} value={intern.firstVisit} />
-                  <InfoRow label={t('profile.totalVisits')} value={intern.totalVisits.toString()} />
+                  <InfoRow label={t('scanner.nin')} value={profile.nin} />
+                  <InfoRow label={t('scanner.birthDate')} value={profile.dateNaissance} />
+                  <InfoRow label={t('profile.birthPlace')} value={profile.lieuNaissance} />
+                  <InfoRow label={t('profile.firstVisit')} value={profile.firstVisit} />
+                  <InfoRow label={t('profile.totalVisits')} value={profile.totalVisits?.toString()} />
                 </div>
               </div>
             </div>
@@ -83,16 +98,16 @@ function ProfileCard({ internId }: { internId: string }) {
                 {t('profile.cardScan')}
               </div>
               <div className="flex justify-center">
-                <Badge type={intern.type} />
+                <Badge type={profile.type} />
               </div>
             </CardContent>
           </Card>
 
           <div className="lg:col-span-2 space-y-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <MiniStat label={t('profile.weekVisits')} value="5" />
-              <MiniStat label={t('profile.totalTime')} value="42h" />
-              <MiniStat label={t('profile.avgArrival')} value="8:36" />
+              <MiniStat label={t('profile.weekVisits')} value={weekVisits.length.toString()} />
+              <MiniStat label={t('profile.totalTime')} value={`${Math.round(weekVisits.reduce((s: number, w: any) => s + (w.duree || 0), 0))}h`} />
+              <MiniStat label={t('profile.avgArrival')} value={profile.avgArrival || '--:--'} />
             </div>
 
             <FadeIn>
@@ -134,7 +149,7 @@ function ProfileCard({ internId }: { internId: string }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {internVisits.map((visit) => (
+                {(visits || []).map((visit: any) => (
                   <TableRow key={visit.id}>
                     <TableCell>{visit.date}</TableCell>
                     <TableCell>{visit.arrivee}</TableCell>

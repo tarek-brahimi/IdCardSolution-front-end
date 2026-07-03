@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Download } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { useTranslation } from '@/lib/language-context'
-import { mockVisits } from '@/data/mock-visits'
+import { api } from '@/lib/api'
 import type { Visit } from '@/types'
 
 function VisitsTable({ visits, title }: { visits: Visit[]; title?: string }) {
@@ -73,8 +73,14 @@ function VisitsTable({ visits, title }: { visits: Visit[]; title?: string }) {
 
 function HistoryPage() {
   const [dateFilter, setDateFilter] = useState('')
+  const [visits, setVisits] = useState<any[]>([])
   const { t } = useTranslation()
-  const visits = dateFilter ? mockVisits.filter((v) => v.date === dateFilter) : mockVisits
+
+  useEffect(() => {
+    const params: any = {}
+    if (dateFilter) params.date = dateFilter
+    api.listVisits(params).then(setVisits).catch(() => setVisits([]))
+  }, [dateFilter])
 
   return (
     <div className="space-y-6">

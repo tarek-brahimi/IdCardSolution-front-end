@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/shared/avatar'
 import { StaggerContainer, StaggerItem } from '@/components/shared/motion'
 import { useTranslation } from '@/lib/language-context'
-import { mockInterns } from '@/data/mock-interns'
+import { useApi } from '@/hooks/use-api'
+import { api } from '@/lib/api'
 
 function PresentList() {
   const { t } = useTranslation()
-  const presentInterns = mockInterns.filter((intern) => intern.status === 'present')
+  const { data: interns } = useApi(() => api.listStagiaires({ status: 'present' }))
+  const presentInterns = interns || []
 
   return (
     <Card>
@@ -25,7 +27,7 @@ function PresentList() {
           </div>
         ) : (
           <StaggerContainer className="space-y-3">
-            {presentInterns.map((intern) => (
+            {presentInterns.map((intern: any) => (
               <StaggerItem key={intern.id}>
                 <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3 transition-colors hover:bg-slate-50">
                   <div className="flex items-center gap-3">
