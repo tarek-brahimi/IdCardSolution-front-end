@@ -66,10 +66,8 @@ function Sidebar() {
         </button>
 
         <div className="border-b border-slate-800 p-4">
-          <Link href="/dashboard" className="flex justify-start pl-2">
-            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg">
-              <Image src="/logo.svg" alt="Algérie Télécom" width={80} height={10} className="object-contain" />
-            </div>
+          <Link href="/dashboard" className="flex justify-center">
+            <Image src="/logo.svg" alt="Algérie Télécom" width={180} height={80} className="h-auto w-full object-contain" />
           </Link>
         </div>
 
