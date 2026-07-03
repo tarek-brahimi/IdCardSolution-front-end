@@ -3,6 +3,7 @@
 import { Check, X } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/shared/avatar'
 import { InfoRow } from '@/components/shared/info-row'
 import { useTranslation } from '@/lib/language-context'
@@ -48,20 +49,14 @@ function ScanResult({
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button
-            onClick={onConfirm}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-indigo-600 py-3 font-semibold text-white transition-colors hover:bg-indigo-700"
-          >
-            <Check className="h-5 w-5" />
+          <Button onClick={onConfirm} className="flex-1" size="lg">
+            <Check className="mr-2 h-5 w-5" />
             {t('scanner.confirmCheckin')}
-          </button>
-          <button
-            onClick={onCancel}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-600 py-3 font-semibold text-white transition-colors hover:bg-red-700"
-          >
-            <X className="h-5 w-5" />
+          </Button>
+          <Button onClick={onCancel} variant="destructive" className="flex-1" size="lg">
+            <X className="mr-2 h-5 w-5" />
             {t('scanner.cancel')}
-          </button>
+          </Button>
         </div>
       </CardContent>
     </Card>

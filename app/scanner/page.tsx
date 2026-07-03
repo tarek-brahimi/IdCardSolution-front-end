@@ -8,6 +8,7 @@ import { ScanResult } from '@/components/scanner/scan-result'
 import { useScan } from '@/hooks/use-scan'
 import { useTranslation } from '@/lib/language-context'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { StaggerContainer, StaggerItem } from '@/components/shared/motion'
 
 export default function ScannerPage() {
@@ -32,12 +33,14 @@ export default function ScannerPage() {
             <CardContent className="space-y-4">
               <CameraView />
               <ScanStatusIndicator status={status} />
-              <button
+              <Button
                 onClick={simulateScan}
-                className="w-full rounded-lg bg-indigo-600 py-3 font-semibold text-white transition-colors hover:bg-indigo-700"
+                disabled={status === 'processing'}
+                className="w-full"
+                size="lg"
               >
                 {t('scanner.simulate')}
-              </button>
+              </Button>
             </CardContent>
           </Card>
         </StaggerItem>

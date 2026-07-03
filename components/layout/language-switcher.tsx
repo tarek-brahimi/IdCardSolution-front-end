@@ -9,11 +9,13 @@ function LanguageSwitcher() {
   const { locale, setLocale } = useTranslation()
 
   return (
-    <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
-      <Globe className="h-4 w-4 text-slate-500 mx-1" />
+    <div role="radiogroup" aria-label="Language selection" className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+      <Globe className="h-4 w-4 text-slate-500 mx-1" aria-hidden="true" />
       {locales.map((l) => (
         <button
           key={l}
+          role="radio"
+          aria-checked={locale === l}
           onClick={() => setLocale(l)}
           className={cn(
             'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',

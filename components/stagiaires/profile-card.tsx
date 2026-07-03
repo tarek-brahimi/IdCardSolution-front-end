@@ -1,9 +1,11 @@
 'use client'
 
-import { LogOut } from 'lucide-react'
+import Link from 'next/link'
+import { LogOut, UserX } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge, StatusBadge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/shared/avatar'
 import { InfoRow } from '@/components/shared/info-row'
 import { MiniStat } from '@/components/shared/mini-stat'
@@ -17,7 +19,20 @@ import { weekVisits } from '@/data/chart-data'
 function ProfileCard({ internId }: { internId: string }) {
   const intern = mockInterns.find((i) => i.id === internId)
   const { t } = useTranslation()
-  if (!intern) return null
+
+  if (!intern) {
+    return (
+      <FadeIn>
+        <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+          <UserX className="mb-4 h-12 w-12" />
+          <p className="mb-4 text-lg font-medium">{t('profile.notFound')}</p>
+          <Link href="/stagiaires">
+            <Button variant="outline">{t('profile.back')}</Button>
+          </Link>
+        </div>
+      </FadeIn>
+    )
+  }
 
   const internVisits = mockVisits.filter((v) => v.internId === internId)
 
@@ -29,10 +44,10 @@ function ProfileCard({ internId }: { internId: string }) {
             {intern.prenom} {intern.nom}
           </h1>
           {intern.status === 'present' && (
-            <button className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-700">
-              <LogOut className="h-5 w-5" />
+            <Button variant="destructive" size="lg">
+              <LogOut className="mr-2 h-5 w-5" />
               {t('dashboard.checkout')}
-            </button>
+            </Button>
           )}
         </div>
       </StaggerItem>
@@ -125,7 +140,13 @@ function ProfileCard({ internId }: { internId: string }) {
                     <TableCell>{visit.arrivee}</TableCell>
                     <TableCell>{visit.depart || '-'}</TableCell>
                     <TableCell className="font-semibold">{visit.duree}</TableCell>
-                    <TableCell className="font-semibold text-emerald-600">{t('history.complete')}</TableCell>
+                    <TableCell>
+                      {visit.depart ? (
+                        <span className="font-semibold text-emerald-600">{t('history.complete')}</span>
+                      ) : (
+                        <span className="font-semibold text-amber-600">{t('history.ongoing')}</span>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

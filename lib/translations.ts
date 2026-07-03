@@ -92,7 +92,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     'history.duration': 'Durée',
     'history.status': 'Statut',
     'history.complete': 'Complète',
+    'history.ongoing': 'En cours',
     'history.print': 'Imprimer le rapport',
+
+    // Header
+    'header.notifications': 'Notifications',
+
+    // Profile
+    'profile.notFound': 'Profil introuvable',
 
     // Table shared
     'table.date': 'Date',
@@ -189,7 +196,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     'history.duration': 'Duration',
     'history.status': 'Status',
     'history.complete': 'Complete',
+    'history.ongoing': 'In progress',
     'history.print': 'Print report',
+
+    // Header
+    'header.notifications': 'Notifications',
+
+    // Profile
+    'profile.notFound': 'Profile not found',
 
     // Table shared
     'table.date': 'Date',
@@ -286,7 +300,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     'history.duration': 'المدة',
     'history.status': 'الحالة',
     'history.complete': 'مكتمل',
+    'history.ongoing': 'جاري',
     'history.print': 'طباعة التقرير',
+
+    // Header
+    'header.notifications': 'الإشعارات',
+
+    // Profile
+    'profile.notFound': 'الملف الشخصي غير موجود',
 
     // Table shared
     'table.date': 'التاريخ',

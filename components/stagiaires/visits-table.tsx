@@ -5,6 +5,7 @@ import { Download } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { useTranslation } from '@/lib/language-context'
 import { mockVisits } from '@/data/mock-visits'
@@ -34,19 +35,35 @@ function VisitsTable({ visits, title }: { visits: Visit[]; title?: string }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {visits.map((visit) => (
-              <TableRow key={visit.id}>
-                <TableCell>{visit.date}</TableCell>
-                <TableCell className="font-semibold text-slate-900">{visit.stagiaire}</TableCell>
-                <TableCell>
-                  <Badge type={visit.type} />
+            {visits.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7}>
+                  <div className="py-8 text-center text-sm text-slate-400">
+                    {t('history.title')}
+                  </div>
                 </TableCell>
-                <TableCell>{visit.arrivee}</TableCell>
-                <TableCell>{visit.depart || '-'}</TableCell>
-                <TableCell className="font-semibold">{visit.duree}</TableCell>
-                <TableCell className="font-semibold text-emerald-600">{t('history.complete')}</TableCell>
               </TableRow>
-            ))}
+            ) : (
+              visits.map((visit) => (
+                <TableRow key={visit.id}>
+                  <TableCell>{visit.date}</TableCell>
+                  <TableCell className="font-semibold text-slate-900">{visit.stagiaire}</TableCell>
+                  <TableCell>
+                    <Badge type={visit.type} />
+                  </TableCell>
+                  <TableCell>{visit.arrivee}</TableCell>
+                  <TableCell>{visit.depart || '-'}</TableCell>
+                  <TableCell className="font-semibold">{visit.duree}</TableCell>
+                  <TableCell>
+                    {visit.depart ? (
+                      <span className="font-semibold text-emerald-600">{t('history.complete')}</span>
+                    ) : (
+                      <span className="font-semibold text-amber-600">{t('history.ongoing')}</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </CardContent>
@@ -67,11 +84,12 @@ function HistoryPage() {
           value={dateFilter}
           onChange={(e) => setDateFilter(e.target.value)}
           className="w-auto"
+          aria-label={t('history.date')}
         />
-        <button className="ml-auto flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-indigo-700">
-          <Download className="h-5 w-5" />
+        <Button className="ml-auto" size="lg">
+          <Download className="mr-2 h-5 w-5" />
           {t('history.print')}
-        </button>
+        </Button>
       </div>
       <VisitsTable visits={visits} />
     </div>

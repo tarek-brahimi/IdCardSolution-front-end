@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 function Card({ className, children, ...props }: { className?: string; children: ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('rounded-xl border border-slate-200 bg-white shadow-sm', className)} {...props}>
+    <div className={cn('rounded-xl border border-border bg-card shadow-sm', className)} {...props}>
       {children}
     </div>
   )
@@ -11,7 +11,7 @@ function Card({ className, children, ...props }: { className?: string; children:
 
 function CardHeader({ className, children, ...props }: { className?: string; children: ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('px-6 py-4 border-b border-slate-100', className)} {...props}>
+    <div className={cn('px-6 py-4 border-b border-border', className)} {...props}>
       {children}
     </div>
   )
@@ -19,7 +19,7 @@ function CardHeader({ className, children, ...props }: { className?: string; chi
 
 function CardTitle({ className, children, ...props }: { className?: string; children: ReactNode } & React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn('text-lg font-semibold text-slate-900 font-heading', className)} {...props}>
+    <h3 className={cn('text-lg font-semibold text-card-foreground font-heading', className)} {...props}>
       {children}
     </h3>
   )
