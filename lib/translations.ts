@@ -1,11 +1,12 @@
-export type Locale = 'fr' | 'en' | 'ar'
+export type Locale = 'fr' | 'en' | 'ar' | 'kab'
 
-export const locales: Locale[] = ['fr', 'en', 'ar']
+export const locales: Locale[] = ['fr', 'en', 'ar', 'kab']
 
 export const localeLabels: Record<Locale, string> = {
   fr: 'Français',
   en: 'English',
   ar: 'العربية',
+  kab: 'Taqbaylit',
 }
 
 export const translations: Record<Locale, Record<string, string>> = {
@@ -319,5 +320,109 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Badges
     'badge.present': 'حاضر',
     'badge.absent': 'غائب',
+  },
+
+  kab: {
+    // Navigation
+    'nav.dashboard': 'Awalen n usenfad',
+    'nav.scanner': 'Askan',
+    'nav.interns': 'Inelmaden',
+    'nav.history': 'Amagnu',
+
+    // Sidebar
+    'sidebar.management': 'Asbeddu',
+    'sidebar.role': 'Anagraw',
+
+    // Dashboard
+    'dashboard.title': 'Awalen n usenfad',
+    'dashboard.totalToday': 'Amrid n yinelmaden assa',
+    'dashboard.presentNow': 'Yella tura',
+    'dashboard.totalMonth': 'Amrid n yuraren waggura-agi',
+    'dashboard.avgDuration': 'Amsegher n uzrad',
+    'dashboard.presentTitle': 'Inelmaden yellen tura',
+    'dashboard.arrival': 'Akeččuṛ',
+    'dashboard.checkout': 'Tawlaft',
+
+    // Charts
+    'chart.access7days': 'Anekcum – 7 issuran i ɣef yuwa',
+    'chart.distribution': 'Aserser s wanus n tkarḍit',
+    'chart.other': 'Wayeḍ',
+
+    // Scanner
+    'scanner.title': 'Askan',
+    'scanner.camera': 'Takamiwt',
+    'scanner.simulate': 'Saliw askan',
+    'scanner.resultTitle': 'Agmuḍ n uskan',
+    'scanner.status.waiting': 'Yerra kun s uskan...',
+    'scanner.status.detected': 'Takarḍit ttwafṛen',
+    'scanner.status.processing': 'Yettwasefrek...',
+    'scanner.cardType': 'Ananus n tkarḍit',
+    'scanner.name': 'Isem',
+    'scanner.firstName': 'Isem n leqdac',
+    'scanner.birthDate': 'Azemal n teyyurt',
+    'scanner.nin': 'NIN',
+    'scanner.ninStatus': 'Addad n NIN',
+    'scanner.ninValid': 'IH',
+    'scanner.arrivalTime': 'Akud n ukeččuṛ',
+    'scanner.confirmCheckin': 'Sugem tuqqna',
+    'scanner.cancel': 'Sefsex',
+
+    // Interns
+    'interns.title': 'Inelmaden',
+    'interns.search': 'Nadi s isem neɣ NIN...',
+    'interns.allTypes': 'Yemma-d iwanen',
+    'interns.allStatuses': 'Yemma-d iaddaden',
+    'interns.present': 'Yella',
+    'interns.absent': 'Ulac-it',
+    'interns.photo': 'Tawlaft',
+    'interns.fullName': 'Isem ummid',
+    'interns.type': 'Ananus',
+    'interns.lastVisit': 'Aseɣẓan aneggaru',
+    'interns.status': 'Addad',
+    'interns.actions': 'Tigawin',
+    'interns.viewProfile': 'Wali akaḍar',
+
+    // Profile
+    'profile.title': 'Akaḍar',
+    'profile.back': 'Uɣal ɣer tebdart',
+    'profile.birthPlace': 'Adeg n teyyurt',
+    'profile.firstVisit': 'Aseɣẓan amenzu',
+    'profile.totalVisits': 'Amrid n yiseɣẓanen',
+    'profile.cardScan': 'Askan n tkarḍit',
+    'profile.weekVisits': 'Iseɣẓanen n wayur-agi',
+    'profile.totalTime': 'Akud ummid',
+    'profile.avgArrival': 'Amsegher n ukeččuṛ',
+    'profile.presence7days': 'Ussan – 7 issuran i ɣef yuwa',
+    'profile.visitHistory': 'Amagnu n yiseɣẓanen',
+
+    // History
+    'history.title': 'Amagnu',
+    'history.stagiaire': 'Anelmad',
+    'history.cardType': 'Ananus n tkarḍit',
+    'history.date': 'Azemal',
+    'history.arrival': 'Akeččuṛ',
+    'history.departure': 'Tawlaft',
+    'history.duration': 'Azrad',
+    'history.status': 'Addad',
+    'history.complete': 'Igem',
+    'history.ongoing': 'Yella s wakud',
+    'history.print': 'Siggez asefrak',
+
+    // Header
+    'header.notifications': 'Ilɣa',
+
+    // Profile
+    'profile.notFound': 'Akaḍar ur yettwaf',
+
+    // Table shared
+    'table.date': 'Azemal',
+    'table.arrival': 'Akeččuṛ',
+    'table.departure': 'Tawlaft',
+    'table.duration': 'Azrad',
+    'table.status': 'Addad',
+
+    // Badges
+    'badge.present': 'Yella',
+    'badge.absent': 'Ulac-it',
   },
 }

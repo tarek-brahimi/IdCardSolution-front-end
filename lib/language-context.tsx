@@ -22,7 +22,7 @@ function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    document.documentElement.lang = locale
+    document.documentElement.lang = locale === 'kab' ? 'kab' : locale
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr'
   }, [locale])
 
