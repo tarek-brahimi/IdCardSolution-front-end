@@ -4,7 +4,7 @@ import { SlideUp } from '@/components/shared/motion'
 function StatCard({ label, value, icon: Icon }: { label: string; value: string | number; icon: ElementType }) {
   return (
     <SlideUp>
-      <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex h-full items-center gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="rounded-lg bg-indigo-100 p-3">
           <Icon className="h-6 w-6 text-indigo-600" />
         </div>
